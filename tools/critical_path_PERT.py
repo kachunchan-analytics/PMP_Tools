@@ -11,6 +11,7 @@ def create_project_network():
     while True:
         try:
             print("Enter the tasks (separated by commas):")
+            print("For example, if you have tasks A, B, and C, enter 'A, B, C'.")
             tasks = input().split(',')
             tasks = [task.strip() for task in tasks]
             if not tasks:
@@ -19,9 +20,15 @@ def create_project_network():
         except ValueError as e:
             print(f"Error: {e}. Please try again.")
 
+    G = nx.DiGraph()
+    G.add_nodes_from(tasks)
+
     while True:
         try:
-            print("Enter the dependencies (in the format 'task_id dependent_task_id', separated by commas):")
+            print("Enter the dependencies (in the format 'task_id dependent_task_id relationship', separated by commas):")
+            print("For example, if task A has a Finish-to-Start (FS) dependency with task B, enter 'A B FS'.")
+            print("If task C has a Start-to-Start (SS) dependency with task D, enter 'C D SS'.")
+            print("If task E has a Finish-to-Finish (FF) dependency with task F, enter 'E F FF'.")
             dependencies = input().split(',')
             dependencies = [tuple(dependency.split()) for dependency in dependencies]
             if not dependencies:
@@ -30,10 +37,33 @@ def create_project_network():
         except ValueError as e:
             print(f"Error: {e}. Please try again.")
 
-    G = nx.DiGraph()
-    G.add_nodes_from(tasks)
-    G.add_edges_from(dependencies)
+    for dependency in dependencies:
+        G.add_edge(dependency[0], dependency[1])
+
+    # Allow multiple dependencies per task
+    while True:
+        print("Do you want to add more dependencies? (yes/no)")
+        response = input().lower()
+        if response == 'yes':
+            while True:
+                try:
+                    print("Enter the additional dependencies (in the format 'task_id dependent_task_id relationship', separated by commas):")
+                    additional_dependencies = input().split(',')
+                    additional_dependencies = [tuple(dependency.split()) for dependency in additional_dependencies]
+                    if not additional_dependencies:
+                        raise ValueError("No additional dependencies entered")
+                    break
+                except ValueError as e:
+                    print(f"Error: {e}. Please try again.")
+            for dependency in additional_dependencies:
+                G.add_edge(dependency[0], dependency[1])
+        elif response == 'no':
+            break
+        else:
+            print("Invalid response. Please enter 'yes' or 'no'.")
+
     return G
+
 
 def calculate_critical_path(G):
     """
@@ -61,6 +91,7 @@ def calculate_task_durations():
     while True:
         try:
             print("Enter the task durations (in the format 'task_id duration', separated by commas):")
+            print("For example, if task A has a duration of 5 days, enter 'A 5'.")
             task_durations_input = input().split(',')
             task_durations = {}
             for task_duration in task_durations_input:
