@@ -1,4 +1,5 @@
 import networkx as nx
+import matplotlib.pyplot as plt
 
 def create_project_network():
     """
@@ -7,13 +8,27 @@ def create_project_network():
     Returns:
     G (networkx.DiGraph): Directed graph representing the project network
     """
-    print("Enter the tasks (separated by commas):")
-    tasks = input().split(',')
-    tasks = [task.strip() for task in tasks]
+    while True:
+        try:
+            print("Enter the tasks (separated by commas):")
+            tasks = input().split(',')
+            tasks = [task.strip() for task in tasks]
+            if not tasks:
+                raise ValueError("No tasks entered")
+            break
+        except ValueError as e:
+            print(f"Error: {e}. Please try again.")
 
-    print("Enter the dependencies (in the format 'task_id dependent_task_id', separated by commas):")
-    dependencies = input().split(',')
-    dependencies = [tuple(dependency.split()) for dependency in dependencies]
+    while True:
+        try:
+            print("Enter the dependencies (in the format 'task_id dependent_task_id', separated by commas):")
+            dependencies = input().split(',')
+            dependencies = [tuple(dependency.split()) for dependency in dependencies]
+            if not dependencies:
+                raise ValueError("No dependencies entered")
+            break
+        except ValueError as e:
+            print(f"Error: {e}. Please try again.")
 
     G = nx.DiGraph()
     G.add_nodes_from(tasks)
@@ -43,12 +58,19 @@ def calculate_task_durations():
     Returns:
     task_durations (dict): Dictionary of task durations, where each key is a task ID and each value is the duration
     """
-    print("Enter the task durations (in the format 'task_id duration', separated by commas):")
-    task_durations_input = input().split(',')
-    task_durations = {}
-    for task_duration in task_durations_input:
-        task, duration = task_duration.split()
-        task_durations[task] = int(duration)
+    while True:
+        try:
+            print("Enter the task durations (in the format 'task_id duration', separated by commas):")
+            task_durations_input = input().split(',')
+            task_durations = {}
+            for task_duration in task_durations_input:
+                task, duration = task_duration.split()
+                task_durations[task] = int(duration)
+            if not task_durations:
+                raise ValueError("No task durations entered")
+            break
+        except ValueError as e:
+            print(f"Error: {e}. Please try again.")
     return task_durations
 
 def calculate_earliest_start_time(G, task_durations):
@@ -108,6 +130,17 @@ def calculate_slack_time(earliest_start_times, latest_finish_times, task_duratio
         slack_times[task] = slack_time
     return slack_times
 
+def plot_project_network(G):
+    """
+    Plot the project network diagram.
+
+    Args:
+    G (networkx.DiGraph): Directed graph representing the project network
+    """
+    pos = nx.spring_layout(G)
+    nx.draw_networkx(G, pos, with_labels=True, node_color='skyblue', node_size=1500, edge_color='black', linewidths=1, font_size=12)
+    plt.show()
+
 def main():
     G = create_project_network()
     task_durations = calculate_task_durations()
@@ -120,6 +153,8 @@ def main():
     print("Earliest Start Times:", earliest_start_times)
     print("Latest Finish Times:", latest_finish_times)
     print("Slack Times:", slack_times)
+
+    plot_project_network(G)
 
 if __name__ == "__main__":
     main()
